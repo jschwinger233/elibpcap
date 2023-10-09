@@ -9,7 +9,7 @@ import (
 
 func Inject(filter string, insns asm.Instructions, opts Options) (_ asm.Instructions, err error) {
 	if filter == "" {
-		return
+		return insns, nil
 	}
 
 	injectIdx := -1
