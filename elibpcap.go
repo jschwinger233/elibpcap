@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/cilium/ebpf/asm"
-	"github.com/cloudflare/cbpfc"
 )
 
 func Inject(filter string, insns asm.Instructions, opts Options) (_ asm.Instructions, err error) {
@@ -20,28 +19,17 @@ func Inject(filter string, insns asm.Instructions, opts Options) (_ asm.Instruct
 		}
 	}
 	if injectIdx == -1 {
-		err = fmt.Errorf("Cannot find bpf2bpf: %s", opts.AtBpf2Bpf)
-		return
+		return insns, fmt.Errorf("Cannot find bpf2bpf: %s", opts.AtBpf2Bpf)
 	}
 
-	filterInsns, err := CompileEbpf(filter, cbpfc.EBPFOpts{
-		PacketStart: asm.R4,
-		PacketEnd:   asm.R5,
-		Result:      asm.R0,
-		ResultLabel: "result",
-		Working:     [4]asm.Register{asm.R0, asm.R1, asm.R2, asm.R3},
-		LabelPrefix: "filter",
-		StackOffset: 80,
-	})
+	filterInsns, err := CompileEbpf(filter, opts)
 	if err != nil {
-		return
+		return insns, err
 	}
 
 	filterInsns[0] = filterInsns[0].WithMetadata(insns[injectIdx].Metadata)
 	insns[injectIdx] = insns[injectIdx].WithMetadata(asm.Metadata{})
-	insns = append(insns[:injectIdx],
+	return append(insns[:injectIdx],
 		append(filterInsns, insns[injectIdx:]...)...,
-	)
-
-	return insns, nil
+	), nil
 }
