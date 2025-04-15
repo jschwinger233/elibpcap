@@ -22,6 +22,8 @@ const (
 	MaxBpfInstructions       = 4096
 	bpfInstructionBufferSize = 8 * MaxBpfInstructions
 	MAXIMUM_SNAPLEN          = 262144
+
+	RejectAllExpr = "__reject_all__"
 )
 
 type StackOffset int
@@ -43,7 +45,7 @@ Steps:
 3. [!DirectRead] Convert direct memory load to bpf_probe_read_kernel call
 */
 func CompileEbpf(expr string, opts Options) (insts asm.Instructions, err error) {
-	if expr == "__reject_all__" {
+	if expr == RejectAllExpr {
 		return asm.Instructions{
 			asm.Mov.Reg(asm.R4, asm.R5), // r4 = r5 (data = data_end)
 		}, nil
