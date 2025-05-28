@@ -1,0 +1,4 @@
+[submodule "libpcap"]
+	path = libpcap
+	url = git@github.com:the-tcpdump-group/libpcap.git
+	branch = libpcap-1.10.5
