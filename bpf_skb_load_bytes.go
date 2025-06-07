@@ -28,7 +28,7 @@ const (
 )
 
 /*
-If !DirectRead, We have to adjust the ebpf instructions because verifier prevents us from
+If PacketAccessMode == BpfSkbLoadBytes, We have to adjust the ebpf instructions because verifier prevents us from
 directly loading data from memory using raw pointers (except for specific cases like TC BPF direct packet access).
 For example, the instruction "r0 = *(u8 *)(r4 +0)" (where R4 is skb->data)
 will be converted to use bpf_skb_load_bytes(skb, offset, buffer, size).
@@ -51,7 +51,7 @@ The conversion involves:
     f. Restore R4 (data/PacketStart) and R5 (data_end/PacketEnd) from their saved slots on stack.
     g. Restore other saved live registers (R1-R3), taking care not to overwrite inst.Dst.
 */
-func adjustEbpfForLoadBytes(insts asm.Instructions, opts Options) (newInsts asm.Instructions, err error) {
+func adjustEbpfWithBpfSkbLoadBytes(insts asm.Instructions, opts Options) (newInsts asm.Instructions, err error) {
 	// If !DirectRead, prepend instructions to save critical initial registers
 	// These are assumed to be R1 (_skb), R4 (data), R5 (data_end) at the entry of the filter function code.
 	var prefixInsts asm.Instructions
@@ -208,11 +208,5 @@ func adjustEbpfForLoadBytes(insts asm.Instructions, opts Options) (newInsts asm.
 
 	resultWithPrefix := append(prefixInsts, finalProcessedInsts...)
 
-	return append(resultWithPrefix,
-		asm.Mov.Imm(asm.R1, 0).WithSymbol(opts.resultLabel()),
-		asm.Mov.Imm(asm.R2, 0),
-		asm.Mov.Imm(asm.R3, 0),
-		asm.Mov.Reg(asm.R4, opts.result()),
-		asm.Mov.Imm(asm.R5, 0),
-	), nil
+	return resultWithPrefix, nil
 }
