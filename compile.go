@@ -72,10 +72,7 @@ func CompileEbpf(expr string, opts Options) (insts asm.Instructions, err error) 
 	}
 
 	if opts.Debug {
-		log.Printf("Original eBPF from cbpfc.ToEBPF for %q:", expr)
-		for i, inst := range ebpfInsts {
-			log.Printf("  %3d: %v", i, inst)
-		}
+		log.Printf("original eBPF from cbpfc.ToEBPF for %q:\n%s", expr, ebpfInsts)
 	}
 
 	return adjustEbpf(ebpfInsts, opts)
