@@ -121,9 +121,15 @@ func adjustEbpf(insts asm.Instructions, opts Options) (newInsts asm.Instructions
 	switch opts.PacketAccessMode {
 	case BpfProbeReadKernel:
 		insts, err = adjustEbpfWithBpfProbeReadKernel(insts, opts)
+		if err != nil {
+			return nil, err
+		}
 		break
 	case BpfSkbLoadBytes:
 		insts, err = adjustEbpfWithBpfSkbLoadBytes(insts, opts)
+		if err != nil {
+			return nil, err
+		}
 		break
 	case Direct:
 		break
