@@ -29,16 +29,6 @@ const (
 
 type StackOffset int
 
-const (
-	BpfReadKernelOffset StackOffset = -8 * (iota + 1)
-	R1Offset
-	R2Offset
-	R3Offset
-	R4Offset
-	R5Offset
-	//AvailableOffset
-)
-
 /*
 Steps:
 1. Compile pcap expresion to cbpf using libpcap
