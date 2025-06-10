@@ -45,7 +45,7 @@ func adjustEbpfWithBpfProbeReadKernel(insts asm.Instructions, opts Options) (new
 				asm.LoadMem(inst.Dst, asm.RFP, int16(BpfDataReadOffset), inst.OpCode.Size()),
 
 				// Restore R4, R5 from stack. This is needed because bpf_probe_read_kernel always resets R4 and R5 even if they are not used by bpf_probe_read_kernel.
-				asm.LoadMem(asm.R4, asm.RFP, int16(R4LiveSavedOffset), asm.DWord),
+				asm.LoadMem(asm.R4, asm.RFP, int16(PacketStartSavedOnStack), asm.DWord),
 				asm.LoadMem(asm.R5, asm.RFP, int16(PacketEndSavedOnStack), asm.DWord),
 			)
 
@@ -79,7 +79,7 @@ func adjustEbpfWithBpfProbeReadKernel(insts asm.Instructions, opts Options) (new
 
 	// Store R4, R5 on stack.
 	insts = append([]asm.Instruction{
-		asm.StoreMem(asm.RFP, int16(R4LiveSavedOffset), asm.R4, asm.DWord),
+		asm.StoreMem(asm.RFP, int16(PacketStartSavedOnStack), asm.R4, asm.DWord),
 		asm.StoreMem(asm.RFP, int16(PacketEndSavedOnStack), asm.R5, asm.DWord),
 	}, insts...)
 	return insts, err

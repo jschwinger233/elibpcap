@@ -62,7 +62,6 @@ func adjustEbpfWithBpfSkbLoadBytes(insts asm.Instructions, opts Options) (newIns
 				asm.StoreMem(asm.RFP, int16(R1LiveSavedOffset), asm.R1, asm.DWord),
 				asm.StoreMem(asm.RFP, int16(R2LiveSavedOffset), asm.R2, asm.DWord),
 				asm.StoreMem(asm.RFP, int16(R3LiveSavedOffset), asm.R3, asm.DWord),
-				asm.StoreMem(asm.RFP, int16(R4LiveSavedOffset), asm.R4, asm.DWord),
 			)
 
 			// --- Setup arguments for bpf_skb_load_bytes ---
@@ -168,7 +167,6 @@ func adjustEbpfWithBpfSkbLoadBytes(insts asm.Instructions, opts Options) (newIns
 			if inst.Dst != asm.R3 {
 				restoreLiveRegs = append(restoreLiveRegs, asm.LoadMem(asm.R3, asm.RFP, int16(R3LiveSavedOffset), asm.DWord))
 			}
-			// R4 was restored from PacketStartSavedOnStack, not R4LiveSavedOffset, which is correct.
 			currentReplacement = append(currentReplacement, restoreLiveRegs...)
 
 			currentReplacement[0].Metadata = inst.Metadata
