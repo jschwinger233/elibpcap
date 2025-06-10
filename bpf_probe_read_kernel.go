@@ -29,31 +29,31 @@ func adjustEbpfWithBpfProbeReadKernel(insts asm.Instructions, opts Options) (new
 			replaceInsts[idx] = append(replaceInsts[idx],
 
 				// Store R1, R2, R3 on stack.
-				asm.StoreMem(asm.RFP, int16(R1Offset), asm.R1, asm.DWord),
-				asm.StoreMem(asm.RFP, int16(R2Offset), asm.R2, asm.DWord),
-				asm.StoreMem(asm.RFP, int16(R3Offset), asm.R3, asm.DWord),
+				asm.StoreMem(asm.RFP, int16(R1LiveSavedOffset), asm.R1, asm.DWord),
+				asm.StoreMem(asm.RFP, int16(R2LiveSavedOffset), asm.R2, asm.DWord),
+				asm.StoreMem(asm.RFP, int16(R3LiveSavedOffset), asm.R3, asm.DWord),
 
 				// bpf_probe_read_kernel(RFP-8, size, inst.Src)
 				asm.Mov.Reg(asm.R1, asm.RFP),
-				asm.Add.Imm(asm.R1, int32(BpfReadKernelOffset)),
+				asm.Add.Imm(asm.R1, int32(BpfDataReadOffset)),
 				asm.Mov.Imm(asm.R2, int32(inst.OpCode.Size().Sizeof())),
 				asm.Mov.Reg(asm.R3, inst.Src),
 				asm.Add.Imm(asm.R3, int32(inst.Offset)),
 				asm.FnProbeReadKernel.Call(),
 
 				// inst.Dst = *(RFP-8)
-				asm.LoadMem(inst.Dst, asm.RFP, int16(BpfReadKernelOffset), inst.OpCode.Size()),
+				asm.LoadMem(inst.Dst, asm.RFP, int16(BpfDataReadOffset), inst.OpCode.Size()),
 
 				// Restore R4, R5 from stack. This is needed because bpf_probe_read_kernel always resets R4 and R5 even if they are not used by bpf_probe_read_kernel.
-				asm.LoadMem(asm.R4, asm.RFP, int16(R4Offset), asm.DWord),
-				asm.LoadMem(asm.R5, asm.RFP, int16(R5Offset), asm.DWord),
+				asm.LoadMem(asm.R4, asm.RFP, int16(PacketStartSavedOnStack), asm.DWord),
+				asm.LoadMem(asm.R5, asm.RFP, int16(PacketEndSavedOnStack), asm.DWord),
 			)
 
 			// Restore R1, R2, R3 from stack
 			restoreInsts := asm.Instructions{
-				asm.LoadMem(asm.R1, asm.RFP, int16(R1Offset), asm.DWord),
-				asm.LoadMem(asm.R2, asm.RFP, int16(R2Offset), asm.DWord),
-				asm.LoadMem(asm.R3, asm.RFP, int16(R3Offset), asm.DWord),
+				asm.LoadMem(asm.R1, asm.RFP, int16(R1LiveSavedOffset), asm.DWord),
+				asm.LoadMem(asm.R2, asm.RFP, int16(R2LiveSavedOffset), asm.DWord),
+				asm.LoadMem(asm.R3, asm.RFP, int16(R3LiveSavedOffset), asm.DWord),
 			}
 
 			switch inst.Dst {
@@ -79,8 +79,8 @@ func adjustEbpfWithBpfProbeReadKernel(insts asm.Instructions, opts Options) (new
 
 	// Store R4, R5 on stack.
 	insts = append([]asm.Instruction{
-		asm.StoreMem(asm.RFP, int16(R4Offset), asm.R4, asm.DWord),
-		asm.StoreMem(asm.RFP, int16(R5Offset), asm.R5, asm.DWord),
+		asm.StoreMem(asm.RFP, int16(PacketStartSavedOnStack), asm.R4, asm.DWord),
+		asm.StoreMem(asm.RFP, int16(PacketEndSavedOnStack), asm.R5, asm.DWord),
 	}, insts...)
 	return insts, err
 }
