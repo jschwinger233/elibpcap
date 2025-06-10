@@ -2,6 +2,7 @@ package elibpcap
 
 import (
 	"fmt"
+
 	"github.com/cilium/ebpf/asm"
 )
 
