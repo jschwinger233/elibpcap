@@ -12,4 +12,4 @@ Projects that use elibpcap:
 
 https://mozillazg.com/2025/05/ebpf-let-any-network-ebpf-programs-to-support-pcap-filter-with-elibpcap-en.html
 
-Many thanks to @mozillazg for the blog post.
+Many thanks to [@mozillazg](https://github.com/mozillazg) for the blog post.
